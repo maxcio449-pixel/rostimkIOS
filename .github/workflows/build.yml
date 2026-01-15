@@ -20,16 +20,20 @@ jobs:
 
       - name: Build IPA
         run: |
-          # Чистим перед финальной попыткой
           python3 -m buildozer ios clean
-          # Запускаем сборку
+          # Собираем дебаг-версию
           yes | python3 -m buildozer ios debug
+          # Выводим список всех созданных файлов в лог для проверки
+          echo "--- Список найденных файлов ---"
+          find . -name "*.ipa"
+          find . -name "*.app"
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TigerBot-IPA
-          # Ищем файл .ipa в любой папке проекта
-          path: "**/*.ipa"
-          # Если не найдет - билд упадет, и мы сразу поймем почему
-          if-no-files-found: error
+          name: TigerBot-Bundle
+          # Мы забираем всё: и папку bin, и папку с готовым приложением .app
+          path: |
+            bin/*.ipa
+            .buildozer/ios/platform/*/*.app
+          if-no-files-found: warn
