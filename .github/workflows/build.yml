@@ -1,8 +1,37 @@
+name: iOS Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          brew install autoconf automake libtool pkg-config wget || true
+          python3 -m pip install --upgrade pip
+          python3 -m pip install Cython==0.29.33 buildozer kivy-ios packaging jinja2
+
+      - name: Build IPA
+        run: |
+          # Чистим перед финальным рывком
+          python3 -m buildozer ios clean
+          # Запускаем сборку
+          yes | python3 -m buildozer ios debug
+          
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TigerBot-IPA
-          # Мы расширили путь, чтобы он нашел файл в любой подпапке bin
+          # Ищем файл везде, где он может спрятаться
           path: |
             bin/*.ipa
-            .buildozer/ios/platform/*/*.ipa
+            **/*.ipa
+          # Если файл не найден, билд теперь выдаст ошибку, чтобы мы знали сразу
+          if-no-files-found: error
