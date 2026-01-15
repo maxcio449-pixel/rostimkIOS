@@ -21,19 +21,19 @@ jobs:
       - name: Build IPA
         run: |
           python3 -m buildozer ios clean
-          # Собираем дебаг-версию
           yes | python3 -m buildozer ios debug
-          # Выводим список всех созданных файлов в лог для проверки
-          echo "--- Список найденных файлов ---"
-          find . -name "*.ipa"
-          find . -name "*.app"
+          
+          # --- ТУТ МАГИЯ ДЛЯ ПОИСКА ---
+          echo "ПРОВЕРКА НАЛИЧИЯ ФАЙЛОВ:"
+          find . -maxdepth 5 -name "*.ipa"
+          find . -maxdepth 5 -name "*.app"
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TigerBot-Bundle
-          # Мы забираем всё: и папку bin, и папку с готовым приложением .app
+          name: TigerBot-Final-Check
+          # Забираем всё дерево папок, где может быть результат
           path: |
-            bin/*.ipa
+            bin/
             .buildozer/ios/platform/*/*.app
           if-no-files-found: warn
